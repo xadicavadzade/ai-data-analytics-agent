@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form
 
 from app.agent.analytics_agent import AnalyticsAgent
 from app.api.dependencies import get_agent
-from app.loaders.factory import LoaderFactory
+from app.loads.factory import LoaderFactory
 from app.models.state import AgentState
 from app.schemas.response import QueryResponse
 
