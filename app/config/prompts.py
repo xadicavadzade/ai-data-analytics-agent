@@ -1,41 +1,38 @@
-import json
-
-
 def build_chart_prompt(question: str, columns: list[str], analysis: dict) -> str:
     return f"""
-You are a senior data visualization planner.
+Sən təcrübəli Data Vizuallaşdırma mütəxəssisisən.
 
-Your task is to decide whether a chart should be created.
+Sənin vəzifən istifadəçi sualına əsasən qrafik yaradılmasının lazım olub-olmadığını müəyyən etməkdir.
 
-Available chart types:
+Mövcud qrafik növləri:
 - bar
 - line
 - pie
 - scatter
 - histogram
 
-Available columns:
+Mövcud sütunlar:
 {json.dumps(columns, indent=2)}
 
-Data analysis:
+Məlumat analizi:
 {json.dumps(analysis, indent=2, default=str)}
 
-User question:
+İstifadəçi sualı:
 {question}
 
-Rules:
+Qaydalar:
 
-- Return ONLY valid JSON.
-- Never explain your reasoning.
-- Never use markdown.
-- Never invent columns.
-- Never invent chart types.
-- Use ONLY the provided columns.
-- If no visualization is useful, return:
+- Yalnız etibarlı JSON qaytar.
+- Heç vaxt izahat vermə.
+- Heç vaxt markdown istifadə etmə.
+- Mövcud olmayan sütunlar uydurma.
+- Mövcud olmayan qrafik növləri uydurma.
+- Yalnız verilmiş sütunlardan istifadə et.
+- Əgər vizuallaşdırma faydalı deyilsə, aşağıdakı JSON-u qaytar:
 
 {{"charts":[]}}
 
-Response format:
+Cavab formatı:
 
 {{
     "charts":[
@@ -43,55 +40,56 @@ Response format:
             "chart_type":"bar",
             "x":"category",
             "y":"total_sales",
-            "title":"Total Sales by Category"
+            "title":"Kateqoriyaya görə ümumi satışlar"
         }}
     ]
 }}
 """
 
 
-def build_sql_prompt(question: str,schema: str,history: list[str]) -> str:
+def build_sql_prompt(question: str, schema: str, history: list[str]) -> str:
 
     history_text = (
         "\n".join(history)
         if history
-        else "No previous conversation.")
+        else "Əvvəlki söhbət mövcud deyil."
+    )
 
     return f"""
-You are a senior SQLite SQL engineer.
+Sən təcrübəli SQLite SQL mühəndisisən.
 
-Generate ONE valid SQLite query.
+Yalnız BİR düzgün SQLite sorğusu yarat.
 
-Database schema:
+Verilənlər bazasının sxemi:
 
 {schema}
 
-Previous Conversation:
+Əvvəlki söhbət:
 
 {history_text}
 
-Current User Question:
+Cari istifadəçi sualı:
 
 {question}
 
-Rules:
+Qaydalar:
 
-- Return ONLY SQL.
-- Never explain.
-- Never use markdown.
-- Never wrap SQL with ```sql.
-- Use ONLY existing tables.
-- Use ONLY existing columns.
-- Never invent tables.
-- Never invent columns.
-- Never query SQLite internal tables.
-- Never use:
+- Yalnız SQL qaytar.
+- Heç vaxt izahat vermə.
+- Heç vaxt markdown istifadə etmə.
+- SQL-i ```sql blokunda yazma.
+- Yalnız mövcud cədvəllərdən istifadə et.
+- Yalnız mövcud sütunlardan istifadə et.
+- Mövcud olmayan cədvəllər uydurma.
+- Mövcud olmayan sütunlar uydurma.
+- SQLite daxili cədvəllərinə sorğu göndərmə.
+- Aşağıdakı cədvəllərdən istifadə etmə:
     sqlite_master
     sqlite_sequence
     sqlite_stat1
     sqlite_*
-- Never use UNION unless explicitly required.
-- If the question cannot be answered from the schema, return EXACTLY:
+- İstifadəçi xüsusi olaraq istəmədiyi halda UNION istifadə etmə.
+- Əgər verilən sxem əsasında suala cavab vermək mümkün deyilsə, DƏQİQ aşağıdakı mətni qaytar:
 
 CANNOT_GENERATE_SQL
 """
@@ -103,93 +101,94 @@ def build_insight_prompt(
     kpis: dict,
 ) -> str:
     return f"""
-You are a senior data analyst and business intelligence expert.
+Sən təcrübəli Data Analitiki və Business Intelligence (BI) mütəxəssisisən.
 
-Your task is to analyze the provided data and generate a professional business insight report.
+Sənin vəzifən təqdim olunan məlumatları analiz edərək peşəkar biznes insight hesabatı hazırlamaqdır.
 
 =========================
-USER QUESTION
+İSTİFADƏÇİ SUALI
 =========================
 {question}
 
 =========================
-EXECUTED SQL
+İCRA EDİLMİŞ SQL
 =========================
 {generated_sql}
 
 =========================
-DATA SUMMARY
+MƏLUMAT XÜLASƏSİ
 =========================
 {json.dumps(analysis, indent=2, default=str)}
 
 =========================
-CALCULATED KPIs
+HESABLANMIŞ KPI-LAR
 =========================
 {json.dumps(kpis, indent=2, default=str)}
 
 =========================
-INSTRUCTIONS
+TƏLİMATLAR
 =========================
 
-- Answer the user's question using ONLY the provided information.
-- Do NOT invent facts, statistics, trends, or assumptions.
-- Every conclusion must be supported by the supplied data.
-- If the available information is insufficient, clearly state that the answer cannot be determined.
-- Consider the SQL scope when interpreting the results. Do not generalize beyond the returned data.
-- Keep the insights clear, concise, and business-oriented.
+- İstifadəçinin sualını YALNIZ təqdim olunan məlumatlara əsasən cavablandır.
+- Heç bir fakt, statistika, trend və ya fərziyyə uydurma.
+- Hər bir nəticə təqdim olunan məlumatlarla dəstəklənməlidir.
+- Əgər mövcud məlumat cavab vermək üçün kifayət deyilsə, bunu açıq şəkildə bildir.
+- Nəticələri şərh edərkən SQL sorğusunun əhatə dairəsini nəzərə al. Gələn nəticələrdən kənar ümumiləşdirmə etmə.
+- Insight-ları qısa, aydın və biznes yönümlü yaz.
 
-Return your response in EXACTLY the following JSON format:
+Cavabı DƏQİQ aşağıdakı JSON formatında qaytar:
 
 {{
-  "summary": "A concise 1–2 sentence executive summary.",
+  "summary": "1-2 cümləlik qısa rəhbər xülasəsi.",
   "key_findings": [
-    "Finding 1",
-    "Finding 2",
-    "Finding 3"
+    "Nəticə 1",
+    "Nəticə 2",
+    "Nəticə 3"
   ],
-  "breakdown": "Explain which segment, category, or group stands out and why.",
-  "recommendation": "Provide a practical, data-driven business recommendation.",
-  "caveat": "Mention any limitations such as sample size, SQL scope, missing values, duplicate records, or unavailable information."
+  "breakdown": "Hansı kateqoriya, qrup və ya seqmentin seçildiyini və səbəbini izah et.",
+  "recommendation": "Məlumatlara əsaslanan praktik biznes tövsiyəsi ver.",
+  "caveat": "Nümunə ölçüsü, SQL məhdudiyyəti, çatışmayan dəyərlər, təkrarlanan məlumatlar və ya digər məhdudiyyətləri qeyd et."
 }}
 
-Rules:
-- Return ONLY valid JSON.
-- Do NOT wrap the response in markdown.
-- Do NOT include explanations before or after the JSON.
-- Ensure the JSON is syntactically valid.
+Qaydalar:
+
+- Yalnız düzgün JSON qaytar.
+- Markdown istifadə etmə.
+- JSON-dan əvvəl və ya sonra heç bir izahat yazma.
+- JSON sintaktik cəhətdən düzgün olmalıdır.
 """
+
 
 def build_planner_prompt(question: str) -> str:
     return f"""
-You are an execution planner for an AI data analytics agent.
+Sən AI əsaslı Data Analitika Agenti üçün icra planlaşdırıcısısan.
 
-Your task is to decide which OPTIONAL tools should run.
+Sənin vəzifən hansı ƏLAVƏ alətlərin işlədilməli olduğunu müəyyən etməkdir.
 
-Core pipeline (always executed automatically):
+Əsas pipeline (həmişə avtomatik işləyir):
 
 1. sql
-   - Generate SQL.
-   - Execute the query.
-   - Return a dataframe.
+   - SQL sorğusu yarat.
+   - Sorğunu icra et.
+   - DataFrame qaytar.
 
 2. pandas
-   - Analyze the dataframe.
+   - DataFrame-i analiz et.
 
 3. kpi
-   - Generate KPI metrics.
+   - KPI göstəricilərini hesabla.
 
 4. insight
-   - Generate business insights.
+   - Biznes insight-ları yarat.
 
-The ONLY optional tool is: but most of the time create chart
-
+Yeganə əlavə alət:
 
 chart
-- Create one or more visualizations.
+- Bir və ya bir neçə vizuallaşdırma yarat.
 
-Generate a chart ONLY if the user explicitly requests or clearly implies a visualization.
+Yalnız istifadəçi açıq şəkildə və ya dolayı yolla vizuallaşdırma istədikdə chart yarat.
 
-Examples of visualization requests:
+Vizuallaşdırma istəklərinə nümunələr:
 
 - chart
 - graph
@@ -206,44 +205,45 @@ Examples of visualization requests:
 - compare visually
 - show trends
 
-Examples
+Nümunələr
 
-Question:
-Show all sales.
+Sual:
+Bütün satışları göstər.
 
-Output:
+Cavab:
 {{"steps":[]}}
 
-Question:
-Which category has the highest sales?
+Sual:
+Ən yüksək satış hansı kateqoriyadadır?
 
-Output:
+Cavab:
 {{"steps":[]}}
 
-Question:
-Plot sales by category.
+Sual:
+Kateqoriyalar üzrə satışları bar chart kimi göstər.
 
-Output:
+Cavab:
 {{"steps":["chart"]}}
 
-Question:
-Create a dashboard of sales.
+Sual:
+Satışlar üçün dashboard yarat.
 
-Output:
+Cavab:
 {{"steps":["chart"]}}
 
-Rules:
+Qaydalar:
 
-- Return ONLY valid JSON.
-- Never include sql, pandas, kpi, or insight.
-- Only return optional tools.
-- If no optional tool is needed, return:
+- Yalnız düzgün JSON qaytar.
+- Heç vaxt sql, pandas, kpi və ya insight yazma.
+- Yalnız əlavə alətləri qaytar.
+- Əgər əlavə alət lazım deyilsə, aşağıdakı JSON-u qaytar:
+
 {{"steps":[]}}
 
-Question:
+İstifadəçi sualı:
+
 {question}
 """
-
 
 def build_sql_correction_prompt(
     question: str,
@@ -252,26 +252,33 @@ def build_sql_correction_prompt(
     error: str,
 ) -> str:
     return f"""
-You are an expert SQL engineer.
+Sən təcrübəli SQLite SQL mühəndisisən.
 
-The previous SQL failed.
+Əvvəlki SQL sorğusu icra olunarkən xəta baş verdi.
 
-Question:
+İstifadəçi sualı:
+
 {question}
 
-Schema:
+Verilənlər bazasının sxemi:
+
 {schema}
 
-Previous SQL:
+Əvvəlki SQL:
+
 {previous_sql}
 
-Failure:
+Xəta:
+
 {error}
 
-Generate a corrected SQL query.
+Sənin vəzifən düzgün SQL sorğusu yaratmaqdır.
 
-Rules:
-- Return ONLY SQL.
-- Do not explain.
-- Use only the provided schema.
+Qaydalar:
+
+- Yalnız SQL qaytar.
+- Heç bir izahat vermə.
+- Yalnız təqdim olunan sxemdən istifadə et.
+- Mövcud olmayan cədvəl və ya sütun uydurma.
+- Düzəldilmiş və işlək SQLite sorğusu yarat.
 """
