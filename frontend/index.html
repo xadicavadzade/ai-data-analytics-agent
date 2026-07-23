@@ -3,139 +3,228 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Agent</title>
+<title>Data Agent · Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0b0f0e;
-    --panel:#111714;
-    --panel-2:#151d19;
-    --line:#233028;
-    --text:#e8efe9;
-    --muted:#7f9689;
-    --accent:#5be49b;
-    --accent-dim:#2c6b4c;
-    --amber:#e0b04a;
+    --bg:#08090a;
+    --panel:#121210;
+    --panel-2:#19170f;
+    --line:#2b2721;
+    --line-soft:#201d17;
+    --text:#f0ece2;
+    --muted:#8c8577;
+    --muted-dim:#5c5648;
+    --accent:#ffa94d;
+    --accent-strong:#ffc47d;
+    --accent-dim:#7a5327;
+    --teal:#56d9c5;
+    --danger:#ff6b6b;
+    --danger-dim:#4a2222;
+    --disp:"Space Grotesk","Segoe UI",sans-serif;
     --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
-    --sans:"IBM Plex Sans","Segoe UI",sans-serif;
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{
     margin:0;
     background:
-      radial-gradient(circle at 15% 0%, rgba(91,228,155,0.06), transparent 45%),
+      radial-gradient(ellipse 900px 500px at 85% -5%, rgba(255,169,77,0.07), transparent 55%),
       var(--bg);
     color:var(--text);
-    font-family:var(--sans);
+    font-family:var(--disp);
     display:flex;
+    flex-direction:column;
     height:100vh;
     overflow:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001s !important;transition-duration:0.001s !important;}
+  }
+
+  /* ---------- Ticker ---------- */
+  .ticker{
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:0;
+    background:#000;
+    border-bottom:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--muted-dim);
+    overflow-x:auto;
+    white-space:nowrap;
+    padding:0 6px;
+  }
+  .ticker .seg{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    padding:7px 16px;
+    border-right:1px solid var(--line-soft);
+  }
+  .ticker .seg .k{color:var(--muted-dim);letter-spacing:.08em;text-transform:uppercase;font-size:9.5px;}
+  .ticker .seg .v{color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums;font-size:12.5px;transition:color .3s;}
+  .ticker .seg .v.flash{animation:flashv .6s ease;}
+  @keyframes flashv{0%{color:var(--text);}100%{color:var(--accent);}}
+  .ticker .brand-seg{
+    padding:7px 16px;
+    display:flex;align-items:center;gap:7px;
+    border-right:1px solid var(--line);
+  }
+  .ticker .brand-seg .dot{
+    width:6px;height:6px;border-radius:1px;
+    background:var(--accent);
+    box-shadow:0 0 6px var(--accent);
+    flex-shrink:0;
+  }
+  .ticker .brand-seg b{color:var(--text);letter-spacing:.1em;font-size:10.5px;}
+
+  /* ---------- Shell ---------- */
+  .shell{
+    flex:1;
+    display:flex;
+    min-height:0;
   }
 
   /* ---------- Sidebar ---------- */
   aside{
-    width:300px;
-    min-width:300px;
+    width:308px;
+    min-width:308px;
     background:var(--panel);
     border-right:1px solid var(--line);
     display:flex;
     flex-direction:column;
-    padding:22px 20px;
-    gap:18px;
+    padding:20px 18px;
+    gap:16px;
     overflow-y:auto;
   }
-  .brand{
-    display:flex;
-    align-items:baseline;
-    gap:8px;
-    font-family:var(--mono);
-  }
-  .brand .dot{
-    width:8px;height:8px;border-radius:50%;
-    background:var(--accent);
-    box-shadow:0 0 8px var(--accent);
-    display:inline-block;
-  }
-  .brand h1{
-    font-size:15px;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    margin:0;
+  .brand-title{
+    font-size:14px;
     font-weight:600;
+    letter-spacing:.03em;
+    margin:0 0 2px;
   }
-  .brand span.sub{
+  .brand-sub{
+    font-family:var(--mono);
+    font-size:10.5px;
     color:var(--muted);
-    font-size:11px;
+    margin-bottom:4px;
   }
 
   .field label{
     display:block;
-    font-size:11px;
+    font-size:10.5px;
     text-transform:uppercase;
-    letter-spacing:0.05em;
+    letter-spacing:.06em;
     color:var(--muted);
     margin-bottom:6px;
     font-family:var(--mono);
   }
-  .field input{
+  .field input[type="text"]{
     width:100%;
     background:var(--panel-2);
     border:1px solid var(--line);
     color:var(--text);
     padding:9px 10px;
-    border-radius:6px;
+    border-radius:5px;
     font-family:var(--mono);
-    font-size:12.5px;
+    font-size:12px;
     outline:none;
     transition:border-color .15s;
   }
-  .field input:focus{border-color:var(--accent-dim);}
+  .field input[type="text"]:focus{border-color:var(--accent-dim);}
+  .field input[type="file"]{
+    width:100%;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+  }
+  .field input[type="file"]::file-selector-button{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:6px 10px;
+    border-radius:5px;
+    font-family:var(--mono);
+    font-size:11px;
+    cursor:pointer;
+    margin-right:8px;
+  }
 
   .status-row{
     display:flex;
     align-items:center;
     gap:8px;
     font-family:var(--mono);
-    font-size:12px;
+    font-size:11.5px;
     color:var(--muted);
     padding:8px 10px;
     background:var(--panel-2);
     border:1px solid var(--line);
-    border-radius:6px;
+    border-radius:5px;
   }
   .status-dot{
     width:7px;height:7px;border-radius:50%;
     background:#555;
     flex-shrink:0;
   }
-  .status-dot.ok{background:var(--accent);box-shadow:0 0 6px var(--accent);}
-  .status-dot.bad{background:#e05a5a;box-shadow:0 0 6px #e05a5a;}
+  .status-dot.ok{background:var(--teal);box-shadow:0 0 6px var(--teal);}
+  .status-dot.bad{background:var(--danger);box-shadow:0 0 6px var(--danger);}
+  .status-dot.pending{background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  .origin-note{
+    font-family:var(--mono);
+    font-size:10.5px;
+    line-height:1.6;
+    padding:9px 10px;
+    border-radius:5px;
+    border:1px solid var(--line);
+    color:var(--muted);
+    background:var(--panel-2);
+  }
+  .origin-note.warn{
+    border-color:#5a3a1c;
+    background:#1a1408;
+    color:var(--accent-strong);
+  }
+  .origin-note b{color:var(--text);}
+  .origin-note code{
+    background:var(--panel);
+    padding:1px 4px;
+    border-radius:3px;
+    color:var(--accent);
+  }
 
   .btn{
     background:transparent;
     border:1px solid var(--line);
     color:var(--text);
     padding:9px 12px;
-    border-radius:6px;
+    border-radius:5px;
     font-family:var(--mono);
-    font-size:12px;
+    font-size:11.5px;
     cursor:pointer;
     transition:.15s;
     text-align:left;
   }
   .btn:hover{border-color:var(--accent-dim);color:var(--accent);}
   .btn.ghost{color:var(--muted);}
-  .btn.ghost:hover{color:#e08a5a;border-color:#5a3a2c;}
+  .btn.ghost:hover{color:var(--danger);border-color:var(--danger-dim);}
 
   .sidebar-foot{
     margin-top:auto;
     font-family:var(--mono);
-    font-size:10.5px;
-    color:#4c5a52;
-    line-height:1.6;
+    font-size:10px;
+    color:var(--muted-dim);
+    line-height:1.7;
     border-top:1px solid var(--line);
-    padding-top:14px;
+    padding-top:12px;
   }
+  .sidebar-foot .method{color:var(--teal);}
 
   /* ---------- Main ---------- */
   main{
@@ -147,53 +236,56 @@
   .thread{
     flex:1;
     overflow-y:auto;
-    padding:32px 10%;
+    padding:30px 9%;
     display:flex;
     flex-direction:column;
-    gap:26px;
+    gap:24px;
   }
   .empty{
     margin:auto;
     text-align:center;
     color:var(--muted);
-    font-family:var(--mono);
-    max-width:420px;
+    max-width:440px;
   }
   .empty .glyph{
-    font-size:34px;
+    font-size:30px;
     color:var(--accent-dim);
-    margin-bottom:10px;
+    margin-bottom:12px;
+    font-family:var(--mono);
   }
   .empty h2{
     color:var(--text);
-    font-family:var(--sans);
     font-weight:600;
-    font-size:17px;
+    font-size:18px;
     margin:0 0 8px;
   }
-  .empty p{font-size:12.5px;line-height:1.6;}
+  .empty p{font-size:12.5px;line-height:1.7;font-family:var(--mono);color:var(--muted);}
 
   .msg-user{
     align-self:flex-end;
     max-width:70%;
     background:var(--accent-dim);
-    color:#0b0f0e;
+    color:#120c04;
     padding:11px 15px;
-    border-radius:12px 12px 2px 12px;
-    font-size:14.5px;
+    border-radius:10px 10px 2px 10px;
+    font-size:14px;
     line-height:1.5;
+    font-weight:500;
   }
 
   .msg-agent{
-    max-width:88%;
+    max-width:90%;
     display:flex;
     flex-direction:column;
     gap:12px;
+    animation:rise .25s ease;
   }
+  @keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
   .agent-label{
     font-family:var(--mono);
-    font-size:10.5px;
-    letter-spacing:0.08em;
+    font-size:10px;
+    letter-spacing:.1em;
     text-transform:uppercase;
     color:var(--accent);
     display:flex;
@@ -206,11 +298,57 @@
     background:var(--accent);
     border-radius:1px;
   }
-  .answer-text{
-    font-size:15px;
-    line-height:1.65;
+
+  /* Insight card */
+  .insight{
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    background:var(--panel);
+  }
+  .insight-summary{
+    padding:16px 18px;
+    font-size:15.5px;
+    line-height:1.6;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(255,169,77,0.05), transparent);
+  }
+  .insight-section{
+    padding:12px 18px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .insight-section:last-child{border-bottom:none;}
+  .insight-section h4{
+    margin:0 0 8px;
+    font-family:var(--mono);
+    font-size:9.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .insight-section p{margin:0;font-size:13.5px;line-height:1.65;color:var(--text);}
+  .findings{margin:0;padding:0;list-style:none;}
+  .findings li{
+    position:relative;
+    padding:4px 0 4px 18px;
+    font-size:13.5px;
+    line-height:1.6;
     color:var(--text);
   }
+  .findings li::before{
+    content:"›";
+    position:absolute;left:0;top:4px;
+    color:var(--teal);
+    font-family:var(--mono);
+    font-weight:600;
+  }
+  .recommend{
+    background:rgba(86,217,197,0.06);
+    border-left:2px solid var(--teal);
+  }
+  .recommend h4{color:var(--teal);}
+  .caveat{color:var(--muted);}
+  .caveat p{color:var(--muted);font-style:italic;font-size:12.5px;}
 
   .block{
     background:var(--panel);
@@ -221,36 +359,36 @@
   .block-head{
     padding:8px 14px;
     font-family:var(--mono);
-    font-size:10.5px;
+    font-size:10px;
     text-transform:uppercase;
-    letter-spacing:0.06em;
+    letter-spacing:.07em;
     color:var(--muted);
     border-bottom:1px solid var(--line);
     background:var(--panel-2);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
   }
   pre.sql{
     margin:0;
     padding:14px;
     font-family:var(--mono);
     font-size:12.5px;
-    color:var(--amber);
+    color:var(--accent-strong);
     white-space:pre-wrap;
     word-break:break-word;
   }
-  .table-wrap{
-    max-height:280px;
-    overflow:auto;
-  }
+  .table-wrap{max-height:280px;overflow:auto;}
   table{
     border-collapse:collapse;
     width:100%;
     font-family:var(--mono);
-    font-size:12px;
+    font-size:11.5px;
   }
   th,td{
     padding:7px 12px;
     text-align:left;
-    border-bottom:1px solid var(--line);
+    border-bottom:1px solid var(--line-soft);
     white-space:nowrap;
   }
   th{
@@ -258,87 +396,148 @@
     position:sticky;
     top:0;
     background:var(--panel-2);
+    font-weight:500;
   }
   td{color:var(--text);}
-  tr:hover td{background:rgba(91,228,155,0.04);}
+  tr:hover td{background:rgba(255,169,77,0.03);}
 
-  .charts{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
+  /* KPI grid */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));
+    gap:1px;
+    background:var(--line-soft);
   }
+  .kpi-cell{
+    background:var(--panel);
+    padding:12px 14px;
+  }
+  .kpi-cell .kv{
+    font-family:var(--mono);
+    font-size:19px;
+    font-weight:600;
+    color:var(--text);
+    font-variant-numeric:tabular-nums;
+  }
+  .kpi-cell .kl{
+    font-family:var(--mono);
+    font-size:9.5px;
+    color:var(--muted);
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    margin-top:2px;
+  }
+  .kpi-sub{
+    padding:12px 14px;
+    border-top:1px solid var(--line-soft);
+  }
+  .kpi-sub-title{
+    font-family:var(--mono);
+    font-size:9.5px;
+    color:var(--muted);
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .mini-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;}
+  .mini-table td{padding:4px 8px;border-bottom:1px solid var(--line-soft);color:var(--text);}
+  .mini-table td:first-child{color:var(--muted);}
+  .mini-table td.num{text-align:right;font-variant-numeric:tabular-nums;color:var(--accent);}
+  details.kpi-more{border-top:1px solid var(--line-soft);}
+  details.kpi-more summary{
+    padding:10px 14px;
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--muted);
+    cursor:pointer;
+    letter-spacing:.04em;
+  }
+  details.kpi-more summary:hover{color:var(--accent);}
+  details.kpi-more[open] summary{color:var(--accent);}
+
+  .chart-badges{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line-soft);}
+  .chart-badge{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--muted);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:3px 10px;
+  }
+  .chart-badge b{color:var(--accent);font-weight:500;}
+  .charts{display:flex;flex-wrap:wrap;gap:12px;padding:12px;}
   .charts img{
     max-width:340px;
-    border-radius:8px;
+    border-radius:6px;
     border:1px solid var(--line);
   }
   .chart-missing{
     font-family:var(--mono);
-    font-size:11.5px;
+    font-size:11px;
     color:var(--muted);
     padding:12px;
   }
 
   .error-block{
-    border:1px solid #5a2c2c;
-    background:#1a1010;
+    border:1px solid var(--danger-dim);
+    background:#160e0e;
     color:#e08a8a;
     padding:12px 14px;
     border-radius:8px;
     font-family:var(--mono);
-    font-size:12.5px;
-    max-width:88%;
+    font-size:12px;
+    line-height:1.6;
+    max-width:90%;
   }
+  .error-block b{color:var(--danger);}
 
-  .typing{
-    display:flex;
-    gap:4px;
-    padding:6px 0;
-  }
+  .typing{display:flex;gap:4px;padding:6px 0;}
   .typing span{
-    width:6px;height:6px;background:var(--accent-dim);border-radius:50%;
-    animation:pulse 1.1s infinite ease-in-out;
+    width:6px;height:6px;border-radius:50%;
+    background:var(--muted);
+    animation:blink 1.2s infinite ease-in-out;
   }
-  .typing span:nth-child(2){animation-delay:.15s;}
-  .typing span:nth-child(3){animation-delay:.3s;}
-  @keyframes pulse{0%,80%,100%{opacity:.25;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}
+  .typing span:nth-child(2){animation-delay:.2s;}
+  .typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
 
   /* ---------- Composer ---------- */
   .composer{
+    flex-shrink:0;
+    padding:16px 9% 20px;
     border-top:1px solid var(--line);
-    padding:16px 10%;
-    background:var(--panel);
+    background:var(--bg);
   }
   .composer-inner{
     display:flex;
+    align-items:flex-end;
     gap:10px;
-    background:var(--panel-2);
+    background:var(--panel);
     border:1px solid var(--line);
-    border-radius:10px;
-    padding:6px 6px 6px 16px;
-    align-items:center;
-    transition:border-color .15s;
+    border-radius:12px;
+    padding:8px 8px 8px 16px;
   }
   .composer-inner:focus-within{border-color:var(--accent-dim);}
-  .composer textarea{
+  textarea{
     flex:1;
-    background:none;
+    background:transparent;
     border:none;
     outline:none;
-    resize:none;
     color:var(--text);
-    font-family:var(--sans);
-    font-size:14.5px;
-    line-height:1.5;
+    font-family:var(--disp);
+    font-size:14px;
+    resize:none;
     max-height:140px;
+    line-height:1.5;
     padding:8px 0;
   }
+  textarea::placeholder{color:var(--muted-dim);}
   .send-btn{
     background:var(--accent);
     border:none;
-    color:#08130d;
+    color:#1a1206;
     width:36px;height:36px;
-    border-radius:8px;
+    border-radius:9px;
     cursor:pointer;
     display:flex;
     align-items:center;
@@ -347,11 +546,11 @@
     transition:.15s;
   }
   .send-btn:hover{filter:brightness(1.1);}
-  .send-btn:disabled{background:#334038;cursor:not-allowed;}
+  .send-btn:disabled{background:#3a342a;cursor:not-allowed;}
   .hint{
     font-family:var(--mono);
-    font-size:10.5px;
-    color:#4c5a52;
+    font-size:10px;
+    color:var(--muted-dim);
     margin-top:8px;
     text-align:center;
   }
@@ -359,16 +558,40 @@
   ::-webkit-scrollbar{width:8px;height:8px;}
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
   ::-webkit-scrollbar-track{background:transparent;}
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 780px){
+    .shell{flex-direction:column;}
+    aside{
+      width:100%;min-width:0;
+      flex-direction:row;
+      flex-wrap:wrap;
+      border-right:none;
+      border-bottom:1px solid var(--line);
+      max-height:40vh;
+    }
+    .sidebar-foot{display:none;}
+    .thread{padding:20px 5%;}
+    .composer{padding:12px 5% 16px;}
+  }
 </style>
 </head>
 <body>
 
+<div class="ticker" id="ticker">
+  <div class="brand-seg"><span class="dot"></span><b>DATA AGENT · LEDGER</b></div>
+  <div class="seg"><span class="k">Sətir</span><span class="v" id="tkRows">—</span></div>
+  <div class="seg"><span class="k">Sütun</span><span class="v" id="tkCols">—</span></div>
+  <div class="seg"><span class="k">Təkrar</span><span class="v" id="tkDup">—</span></div>
+  <div class="seg"><span class="k">Boş dəyər</span><span class="v" id="tkNull">—</span></div>
+</div>
+
+<div class="shell">
 <aside>
-  <div class="brand">
-    <span class="dot"></span>
-    <h1>Data&nbsp;Agent</h1>
+  <div>
+    <div class="brand-title">AI Data Analytics Agent</div>
+    <div class="brand-sub">// analitik interfeys</div>
   </div>
-  <span class="sub" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:-14px;">analytics interface</span>
 
   <div class="field">
     <label for="apiBase">API Base URL</label>
@@ -377,22 +600,24 @@
 
   <div class="field">
     <label for="dbFile">Verilənlər Bazası Faylı</label>
-    <input id="dbFile" type="file" accept=".db,.sqlite,.sqlite3" />
-    <div id="fileName" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px;">fayl seçilməyib</div>
+    <input id="dbFile" type="file" accept=".db,.sqlite,.sqlite3,.csv,.xlsx,.xls" />
+    <div id="fileName" style="font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:6px;">fayl seçilməyib</div>
   </div>
 
   <div class="status-row" id="statusRow">
     <span class="status-dot" id="statusDot"></span>
-    <span id="statusText">connection unchecked</span>
+    <span id="statusText">əlaqə yoxlanılmayıb</span>
   </div>
 
-  <button class="btn" id="checkBtn">Check connection</button>
-  <button class="btn ghost" id="clearBtn">Clear conversation</button>
+  <div class="origin-note" id="originNote"></div>
+
+  <button class="btn" id="checkBtn">Əlaqəni yoxla</button>
+  <button class="btn ghost" id="clearBtn">Söhbəti təmizlə</button>
 
   <div class="sidebar-foot">
-    POST /analytics/query<br>
-    POST /clear<br>
-    GET /health
+    <span class="method">POST</span> /analytics/query<br>
+    <span class="method">POST</span> /clear<br>
+    <span class="method">GET</span> /health
   </div>
 </aside>
 
@@ -401,7 +626,7 @@
     <div class="empty" id="emptyState">
       <div class="glyph">◆</div>
       <h2>Suallarınızı verin</h2>
-      <p>Solda API ünvanını qeyd edin və verilənlər bazası faylınızı seçin, sonra aşağıdan bazanız haqqında sual verin. Agent SQL yaradacaq, nəticəni cədvəl və qrafik şəklində göstərəcək.</p>
+      <p>Solda API ünvanını qeyd edin və verilənlər bazası faylınızı seçin, sonra aşağıdan bazanız haqqında sual verin. Agent SQL yaradacaq, struktur təhlil, KPI-lar, cədvəl və qrafik şəklində nəticə göstərəcək.</p>
     </div>
   </div>
 
@@ -415,6 +640,7 @@
     <div class="hint">Enter göndərir · Shift+Enter yeni sətir</div>
   </form>
 </main>
+</div>
 
 <script>
 (function(){
@@ -430,9 +656,44 @@
   const sendBtn = $('sendBtn');
   const statusDot = $('statusDot');
   const statusText = $('statusText');
+  const originNote = $('originNote');
 
-  // Remember last-used settings locally (this file is meant to live in
-  // the user's own project, not inside a Claude artifact sandbox).
+  // Backend-in main.py-dəki CORSMiddleware siyahısı ilə HƏRFİ eynidir.
+  // Bura yalnız görünüş üçündür — real icazə serverdə verilir, amma
+  // uyğunsuzluğu əvvəlcədən görmək "əlaqə yoxdur" xətasını izah edir.
+  const ALLOWED_ORIGINS = [
+    'https://willowy-tanuki-486155.netlify.app',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+  ];
+
+  function renderOriginNote(){
+    const origin = window.location.origin && window.location.origin !== 'null'
+      ? window.location.origin
+      : (window.location.protocol === 'file:' ? 'file://' : window.location.origin);
+
+    const isFile = window.location.protocol === 'file:';
+    const allowed = !isFile && ALLOWED_ORIGINS.includes(origin);
+
+    if(allowed){
+      originNote.className = 'origin-note';
+      originNote.innerHTML = `Bu səhifə <b>${origin}</b> ünvanından açılıb — backend-in icazə siyahısında var. CORS problemi olmamalıdır.`;
+      return;
+    }
+
+    originNote.className = 'origin-note warn';
+    if(isFile){
+      originNote.innerHTML =
+        `<b>Diqqət:</b> fayl birbaşa <code>file://</code> ilə açılıb. Brauzer bunu "boş" origin sayır və backend-in CORS siyahısı bunu qəbul etmir → nəticədə "əlaqə yoxdur" xətası çıxır.<br><br>` +
+        `Həll: VS Code-da <b>Live Server</b> ilə <code>127.0.0.1:5500</code> portunda açın (bu port artıq icazəlidir), ya da faylı <code>https://willowy-tanuki-486155.netlify.app</code> ünvanına yükləyin.`;
+    }else{
+      originNote.innerHTML =
+        `<b>Diqqət:</b> hazırkı ünvan <code>${origin}</code> backend-in CORS icazə siyahısında yoxdur, ona görə sorğular bloklanacaq.<br><br>` +
+        `Həll: səhifəni <code>127.0.0.1:5500</code> və ya <code>localhost:5500</code> portunda açın, ya da backend-dəki <code>main.py</code> faylının <code>allow_origins</code> siyahısına <code>${origin}</code> əlavə edin.`;
+    }
+  }
+  renderOriginNote();
+
   apiBaseInput.value = localStorage.getItem('agent_api_base') || 'https://ai-data-analytics-agent-p0fg.onrender.com';
   apiBaseInput.addEventListener('change', () => localStorage.setItem('agent_api_base', apiBaseInput.value.trim()));
 
@@ -451,14 +712,24 @@
   }
 
   async function checkHealth(){
-    setStatus('', 'yoxlanılır…');
+    setStatus('pending', 'yoxlanılır…');
+    if(!apiBase()){
+      setStatus('bad', 'API ünvanı boşdur');
+      return;
+    }
     try{
       const res = await fetch(apiBase() + '/health');
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       setStatus('ok', 'qoşulub · ' + (data.status || 'ok'));
     }catch(err){
-      setStatus('bad', 'əlaqə yoxdur (CORS / URL yoxlayın)');
+      if(err instanceof TypeError){
+        // fetch() only throws a bare TypeError for network/CORS failures —
+        // real HTTP errors (4xx/5xx) land in the try block above instead.
+        setStatus('bad', 'əlaqə yoxdur (CORS / URL yoxlayın)');
+      }else{
+        setStatus('bad', 'xəta: ' + err.message);
+      }
     }
   }
   $('checkBtn').addEventListener('click', checkHealth);
@@ -469,11 +740,10 @@
     }catch(err){ /* backend may be unreachable — clear UI regardless */ }
     thread.innerHTML = '';
     thread.appendChild(emptyState);
+    resetTicker();
   });
 
-  function scrollDown(){
-    thread.scrollTop = thread.scrollHeight;
-  }
+  function scrollDown(){ thread.scrollTop = thread.scrollHeight; }
 
   function addUserMessage(text){
     if(emptyState.parentNode) emptyState.remove();
@@ -495,10 +765,17 @@
     thread.appendChild(wrap);
     scrollDown();
   }
+  function removeTyping(){ const el = $('typingIndicator'); if(el) el.remove(); }
 
-  function removeTyping(){
-    const el = $('typingIndicator');
-    if(el) el.remove();
+  function escapeHtml(v){
+    if(v === null || v === undefined) return '';
+    return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function fmtNum(n){
+    if(typeof n !== 'number') return escapeHtml(n);
+    if(Number.isInteger(n)) return n.toLocaleString('az-AZ');
+    return n.toLocaleString('az-AZ', {maximumFractionDigits: 2});
   }
 
   function buildTable(rows){
@@ -514,48 +791,127 @@
     return html;
   }
 
-  function escapeHtml(v){
-    if(v === null || v === undefined) return '';
-    return String(v)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function buildInsight(answer){
+    if(!answer) return '';
+    let html = '<div class="insight">';
+    if(answer.summary){
+      html += `<div class="insight-summary">${escapeHtml(answer.summary)}</div>`;
+    }
+    if(answer.key_findings && answer.key_findings.length){
+      html += `<div class="insight-section"><h4>Əsas müşahidələr</h4><ul class="findings">`;
+      html += answer.key_findings.map(f => `<li>${escapeHtml(f)}</li>`).join('');
+      html += `</ul></div>`;
+    }
+    if(answer.breakdown){
+      html += `<div class="insight-section"><h4>Təfərrüat</h4><p>${escapeHtml(answer.breakdown)}</p></div>`;
+    }
+    if(answer.recommendation){
+      html += `<div class="insight-section recommend"><h4>Tövsiyə</h4><p>${escapeHtml(answer.recommendation)}</p></div>`;
+    }
+    if(answer.caveat){
+      html += `<div class="insight-section caveat"><h4>Qeyd</h4><p>${escapeHtml(answer.caveat)}</p></div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function buildKpis(kpis){
+    if(!kpis) return '';
+    const cells = [
+      ['row_count','Sətir'], ['column_count','Sütun'],
+      ['duplicate_rows','Təkrar'], ['missing_values','Boş dəyər'],
+    ];
+    let html = `<div class="block"><div class="block-head">KPI göstəriciləri</div><div class="kpi-grid">`;
+    cells.forEach(([key,label]) => {
+      const v = kpis[key];
+      html += `<div class="kpi-cell"><div class="kv">${v !== undefined ? fmtNum(v) : '—'}</div><div class="kl">${label}</div></div>`;
+    });
+    html += `</div>`;
+
+    if(kpis.numeric_summary && Object.keys(kpis.numeric_summary).length){
+      html += `<details class="kpi-more"><summary>Ədədi sütunlar üzrə xülasə (${Object.keys(kpis.numeric_summary).length})</summary>`;
+      html += `<div class="kpi-sub"><table class="mini-table"><tbody>`;
+      html += `<tr><td><b>sütun</b></td><td class="num">sum</td><td class="num">orta</td><td class="num">min</td><td class="num">maks</td></tr>`;
+      Object.entries(kpis.numeric_summary).forEach(([col, s]) => {
+        html += `<tr><td>${escapeHtml(col)}</td><td class="num">${fmtNum(s.sum)}</td><td class="num">${fmtNum(s.mean)}</td><td class="num">${fmtNum(s.min)}</td><td class="num">${fmtNum(s.max)}</td></tr>`;
+      });
+      html += `</tbody></table></div></details>`;
+    }
+
+    if(kpis.top_categories && Object.keys(kpis.top_categories).length){
+      html += `<details class="kpi-more"><summary>Kateqoriyalar üzrə ən çox rast gəlinən (${Object.keys(kpis.top_categories).length})</summary>`;
+      html += `<div class="kpi-sub"><table class="mini-table"><tbody>`;
+      Object.entries(kpis.top_categories).forEach(([col, s]) => {
+        html += `<tr><td>${escapeHtml(col)}</td><td>${escapeHtml(s.value)}</td><td class="num">${fmtNum(s.count)}</td></tr>`;
+      });
+      html += `</tbody></table></div></details>`;
+    }
+
+    if(kpis.unique_counts && Object.keys(kpis.unique_counts).length){
+      html += `<details class="kpi-more"><summary>Unikal dəyər sayı (${Object.keys(kpis.unique_counts).length} sütun)</summary>`;
+      html += `<div class="kpi-sub"><table class="mini-table"><tbody>`;
+      Object.entries(kpis.unique_counts).forEach(([col, n]) => {
+        html += `<tr><td>${escapeHtml(col)}</td><td class="num">${fmtNum(n)}</td></tr>`;
+      });
+      html += `</tbody></table></div></details>`;
+    }
+
+    html += `</div>`;
+    return html;
+  }
+
+  function flashTicker(id, value){
+    const el = $(id);
+    el.textContent = value !== undefined ? fmtNum(value) : '—';
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  }
+  function updateTicker(kpis){
+    if(!kpis) return;
+    flashTicker('tkRows', kpis.row_count);
+    flashTicker('tkCols', kpis.column_count);
+    flashTicker('tkDup', kpis.duplicate_rows);
+    flashTicker('tkNull', kpis.missing_values);
+  }
+  function resetTicker(){
+    ['tkRows','tkCols','tkDup','tkNull'].forEach(id => $(id).textContent = '—');
   }
 
   function addAgentMessage(result){
     const wrap = document.createElement('div');
     wrap.className = 'msg-agent';
-
     let html = `<div class="agent-label">Data Agent</div>`;
 
-    if(result.answer){
-      html += `<div class="answer-text">${escapeHtml(result.answer)}</div>`;
-    }
+    html += buildInsight(result.answer);
 
     if(result.sql){
-      html += `
-        <div class="block">
-          <div class="block-head">SQL</div>
-          <pre class="sql">${escapeHtml(result.sql)}</pre>
-        </div>`;
+      html += `<div class="block"><div class="block-head">SQL</div><pre class="sql">${escapeHtml(result.sql)}</pre></div>`;
     }
+
+    html += buildKpis(result.kpis);
 
     if(result.data && result.data.length){
-      html += `
-        <div class="block">
-          <div class="block-head">Nəticə · ${result.data.length} sətir</div>
-          ${buildTable(result.data)}
-        </div>`;
+      html += `<div class="block"><div class="block-head">Nəticə · ${result.data.length} sətir</div>${buildTable(result.data)}</div>`;
     }
 
-    if(result.chart_paths && result.chart_paths.length){
-      const imgs = result.chart_paths.map(p => {
-        const src = /^https?:\/\//.test(p) ? p : apiBase() + '/' + p.replace(/^\/+/, '');
-        return `<img src="${src}" alt="chart" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'chart-missing',textContent:'Qrafik faylı serverdə tapılmadı: ${escapeHtml(p)} — backend-də static mount lazımdır.'}))" />`;
-      }).join('');
-      html += `
-        <div class="block">
-          <div class="block-head">Qrafik</div>
-          <div class="charts" style="padding:12px;">${imgs}</div>
-        </div>`;
+    const hasChartSpecs = result.chart && result.chart.charts && result.chart.charts.length;
+    const hasChartFiles = result.chart_paths && result.chart_paths.length;
+    if(hasChartSpecs || hasChartFiles){
+      html += `<div class="block"><div class="block-head">Qrafik</div>`;
+      if(hasChartSpecs){
+        html += `<div class="chart-badges">` + result.chart.charts.map(c =>
+          `<span class="chart-badge"><b>${escapeHtml(c.chart_type)}</b> · ${escapeHtml(c.x)} → ${escapeHtml(c.y)}${c.title ? ' · ' + escapeHtml(c.title) : ''}</span>`
+        ).join('') + `</div>`;
+      }
+      if(hasChartFiles){
+        const imgs = result.chart_paths.map(p => {
+          const src = /^https?:\/\//.test(p) ? p : apiBase() + '/' + p.replace(/^\/+/, '');
+          return `<img src="${src}" alt="chart" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'chart-missing',textContent:'Qrafik faylı serverdə tapılmadı: ${escapeHtml(p)} — backend-də static mount lazımdır.'}))" />`;
+        }).join('');
+        html += `<div class="charts">${imgs}</div>`;
+      }else{
+        html += `<div class="chart-missing">Qrafik planlaşdırılıb, lakin fayl yolu qaytarılmayıb.</div>`;
+      }
+      html += `</div>`;
     }
 
     wrap.innerHTML = html;
@@ -566,7 +922,7 @@
   function addErrorMessage(text){
     const el = document.createElement('div');
     el.className = 'error-block';
-    el.textContent = text;
+    el.innerHTML = text;
     thread.appendChild(el);
     scrollDown();
   }
@@ -586,8 +942,6 @@
       formData.append('question', question);
       formData.append('file', selectedFile);
 
-      // Note: no 'Content-Type' header here on purpose — the browser sets
-      // the multipart boundary automatically when sending a FormData body.
       const res = await fetch(apiBase() + '/analytics/query', {
         method: 'POST',
         body: formData
@@ -602,9 +956,17 @@
 
       const result = await res.json();
       addAgentMessage(result);
+      updateTicker(result.kpis);
     }catch(err){
       removeTyping();
-      addErrorMessage('Xəta: ' + err.message + ' — API ünvanını, CORS ayarlarını və backend-in işlək olduğunu yoxlayın.');
+      if(err instanceof TypeError){
+        addErrorMessage(
+          `<b>Xəta:</b> serverə çatmaq mümkün olmadı.<br>` +
+          `Bu adətən CORS bloku və ya səhv API ünvanı deməkdir — solda "Əlaqəni yoxla" düyməsini basın və yuxarıdakı origin qeydinə baxın.`
+        );
+      }else{
+        addErrorMessage(`<b>Xəta:</b> ${escapeHtml(err.message)}`);
+      }
     }finally{
       sendBtn.disabled = false;
     }
@@ -631,7 +993,6 @@
     questionInput.style.height = Math.min(questionInput.scrollHeight, 140) + 'px';
   });
 
-  // Initial health check
   checkHealth();
 })();
 </script>
