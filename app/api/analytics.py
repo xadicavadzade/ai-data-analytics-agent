@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form
-import os
 
 from app.agent.analytics_agent import AnalyticsAgent
 from app.api.dependencies import get_agent
+from app.loaders.factory import LoaderFactory
 from app.models.state import AgentState
 from app.schemas.response import QueryResponse
 
@@ -18,12 +18,9 @@ async def query(
     file: UploadFile = File(...),
     agent: AnalyticsAgent = Depends(get_agent),
 ):
-    os.makedirs("uploads", exist_ok=True)
+    loader = LoaderFactory.get_loader(file.filename)
 
-    database_path = os.path.join("uploads", file.filename)
-
-    with open(database_path, "wb") as f:
-        f.write(await file.read())
+    database_path = await loader.load(file)
 
     state = AgentState(
         question=question,
