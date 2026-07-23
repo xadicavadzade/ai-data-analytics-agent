@@ -1,3 +1,5 @@
+import json
+
 def build_chart_prompt(question: str, columns: list[str], analysis: dict) -> str:
     return f"""
 Sən təcrübəli Data Vizuallaşdırma mütəxəssisisən.
