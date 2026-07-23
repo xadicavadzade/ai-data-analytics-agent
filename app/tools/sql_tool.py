@@ -12,6 +12,8 @@ from app.validation.sql_validation import SQLValidator
 
 from app.memory.conversation_memory import ConversationMemory
 
+import re
+
 
 logger = setup_logger(__name__)
 
@@ -82,6 +84,11 @@ class SQLTool(BaseTool):
 
 
         sql = await self.llm.generate(prompt)
+
+        sql = re.sub(r"^```sql\s*", "", sql, flags=re.IGNORECASE)
+        sql = re.sub(r"^```\s*", "", sql)
+        sql = re.sub(r"\s*```$", "", sql)
+        sql = sql.strip()
 
         logger.info(f"RAW SQL: {repr(sql)}")
 
