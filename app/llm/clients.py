@@ -1,12 +1,18 @@
-from app.config.settings import MODEL_NAME,MAX_TOKENS,TEMPERATURE,GROQ_API_KEY
+from app.config.settings import (
+    MODEL_NAME,
+    MAX_TOKENS,
+    TEMPERATURE,
+    GROQ_API_KEY,
+)
 from groq import AsyncGroq
+
 
 class LLMClient:
 
     def __init__(self):
         self.client = AsyncGroq(api_key=GROQ_API_KEY)
 
-    async def generate(self,prompt:str) -> str:
+    async def generate(self, prompt: str) -> str:
 
         response = await self.client.chat.completions.create(
             model=MODEL_NAME,
@@ -14,10 +20,25 @@ class LLMClient:
             max_tokens=MAX_TOKENS,
             messages=[
                 {
-                    'role' :'user',
-                    'content' : prompt
+                    "role": "user",
+                    "content": prompt,
                 }
-            ]
+            ],
         )
 
-        return response.choices[0].message.content
+        text = response.choices[0].message.content.strip()
+
+       
+        if text.startswith("```"):
+            lines = text.splitlines()
+
+
+            lines = lines[1:]
+
+        
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+
+            text = "\n".join(lines).strip()
+
+        return text
