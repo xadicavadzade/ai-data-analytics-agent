@@ -4,7 +4,7 @@ import pandas as pd
 from app.database.executor import SQLExecutor
 from app.llm.clients import LLMClient
 from app.database.schema_provider import SchemaProvider
-from app.config.prompts import build_sql_prompt
+from app.config.prompts import build_sql_prompt,build_sql_correction_prompt
 
 from app.config.logger import setup_logger
 
@@ -24,6 +24,52 @@ class SQLTool(BaseTool):
         self.schema_provider = schema_provider
         self.conversation_memory = conversation_memory
 
+    async def _correct_sql(self,state: AgentState,previous_sql: str,error: str,) -> str:
+        prompt = build_sql_correction_prompt(state.question,state.schema,previous_sql,error)
+
+        sql = await self.llm.generate(prompt)
+
+        return sql
+
+
+    async def _generate_and_execute_sql(self,state: AgentState) -> tuple[str, pd.DataFrame]:
+
+        sql = ""  #if sql generation fails, regeneration needs previous sql
+
+        try :
+            sql = await self._generate_sql(state)
+
+            logger.info(f"Generated SQL:\n{sql}")
+
+            SQLValidator.validate_sql(sql)
+            
+            df = self._execute_sql(state.database_path,sql)
+
+            if df.empty:
+                raise ValueError("The SQL returned zero rows.")
+
+        except Exception as e:
+
+
+            sql = await self._correct_sql(
+                state,
+                previous_sql=sql,
+                error=str(e)
+            )
+
+            SQLValidator.validate_sql(sql)
+
+            df = self._execute_sql(state.database_path,sql)
+
+            if df.empty:
+                raise ValueError("Corrected SQL also returned zero rows.")
+
+            logger.info(f"Corrected SQL:\n{sql}")
+
+        return sql,df
+
+
+
     async def _generate_sql(self, state: AgentState) -> str:
         question = state.question
 
@@ -37,13 +83,10 @@ class SQLTool(BaseTool):
 
         sql = await self.llm.generate(prompt)
 
-       
-
-        logger.info(f"Generated SQL:\n{sql}")
+        logger.info(f"RAW SQL: {repr(sql)}")
 
 
-
-        return sql
+        return sql.strip()
 
 
 
@@ -59,23 +102,8 @@ class SQLTool(BaseTool):
 
     async def run(self,state: AgentState) -> AgentState:
 
-        sql = await self._generate_sql(state)
+        sql,df = await self._generate_and_execute_sql(state)
 
-        logger.info(f"Generated SQL:\n{sql}")
-
-        SQLValidator.validate_sql(sql)
-
-        df = self._execute_sql(state.database_path,sql)
-
-        logger.info(f"df is None: {df is None}")
-
-        if df is None:
-            raise ValueError("SQL execution failed.")
-
-        if df.empty:
-            state.df_analysis = {
-                "empty": True
-            }
 
         logger.info(f"Rows returned: {len(df)}")
 
