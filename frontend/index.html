@@ -376,8 +376,9 @@
   </div>
 
   <div class="field">
-    <label for="dbPath">Database Path</label>
-    <input id="dbPath" type="text" placeholder="data/sales.db" />
+    <label for="dbFile">Verilənlər Bazası Faylı</label>
+    <input id="dbFile" type="file" accept=".db,.sqlite,.sqlite3,.csv,.xlsx" />
+    <div id="fileName" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px;">fayl seçilməyib</div>
   </div>
 
   <div class="status-row" id="statusRow">
@@ -400,7 +401,7 @@
     <div class="empty" id="emptyState">
       <div class="glyph">◆</div>
       <h2>Suallarınızı verin</h2>
-      <p>Solda API ünvanını və verilənlər bazasının yolunu qeyd edin, sonra aşağıdan bazanız haqqında sual verin. Agent SQL yaradacaq, nəticəni cədvəl və qrafik şəklində göstərəcək.</p>
+      <p>Solda API ünvanını qeyd edin və verilənlər bazası faylınızı seçin, sonra aşağıdan bazanız haqqında sual verin. Agent SQL yaradacaq, nəticəni cədvəl və qrafik şəklində göstərəcək.</p>
     </div>
   </div>
 
@@ -419,7 +420,9 @@
 (function(){
   const $ = (id) => document.getElementById(id);
   const apiBaseInput = $('apiBase');
-  const dbPathInput = $('dbPath');
+  const dbFileInput = $('dbFile');
+  const fileNameLabel = $('fileName');
+  let selectedFile = null;
   const thread = $('thread');
   const emptyState = $('emptyState');
   const form = $('composerForm');
@@ -431,9 +434,12 @@
   // Remember last-used settings locally (this file is meant to live in
   // the user's own project, not inside a Claude artifact sandbox).
   apiBaseInput.value = localStorage.getItem('agent_api_base') || 'https://ai-data-analytics-agent-p0fg.onrender.com';
-  dbPathInput.value = localStorage.getItem('agent_db_path') || 'data/sales.db';
   apiBaseInput.addEventListener('change', () => localStorage.setItem('agent_api_base', apiBaseInput.value.trim()));
-  dbPathInput.addEventListener('change', () => localStorage.setItem('agent_db_path', dbPathInput.value.trim()));
+
+  dbFileInput.addEventListener('change', () => {
+    selectedFile = dbFileInput.files && dbFileInput.files[0] ? dbFileInput.files[0] : null;
+    fileNameLabel.textContent = selectedFile ? selectedFile.name : 'fayl seçilməyib';
+  });
 
   function apiBase(){
     return apiBaseInput.value.trim().replace(/\/+$/, '');
@@ -566,18 +572,25 @@
   }
 
   async function sendQuestion(question){
+    if(!selectedFile){
+      addErrorMessage('Əvvəlcə solda "Verilənlər Bazası Faylı" seçin — hər sual ilə fayl backend-ə yenidən göndərilir.');
+      return;
+    }
+
     addUserMessage(question);
     addTyping();
     sendBtn.disabled = true;
 
     try{
+      const formData = new FormData();
+      formData.append('question', question);
+      formData.append('file', selectedFile);
+
+      // Note: no 'Content-Type' header here on purpose — the browser sets
+      // the multipart boundary automatically when sending a FormData body.
       const res = await fetch(apiBase() + '/analytics/query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: question,
-          database_path: dbPathInput.value.trim()
-        })
+        body: formData
       });
 
       removeTyping();
