@@ -244,7 +244,6 @@ Maintains conversational context so the agent can answer follow-up questions nat
 
 - Python
 - FastAPI
-- SQLAlchemy
 - SQLite
 - Pandas
 - Matplotlib
@@ -261,8 +260,6 @@ Maintains conversational context so the agent can answer follow-up questions nat
 ### Frontend
 
 - HTML
-- CSS
-- JavaScript
 
 ### Deployment
 
@@ -327,7 +324,6 @@ Create a `.env` file:
 
 ```env
 GROQ_API_KEY=YOUR_API_KEY
-MODEL_NAME=YOUR_MODEL
 ```
 
 ---
