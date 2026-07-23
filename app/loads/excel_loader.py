@@ -5,7 +5,7 @@ import sqlite3
 import pandas as pd
 from fastapi import UploadFile
 
-from app.loaders.base import BaseLoader
+from app.loads.base_load import BaseLoader
 
 
 class ExcelLoader(BaseLoader):
