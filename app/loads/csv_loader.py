@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import sqlite3
 
@@ -15,22 +16,23 @@ class CSVLoader(BaseLoader):
         os.makedirs("uploads", exist_ok=True)
 
         table_name = os.path.splitext(file.filename)[0]
+        table_name = re.sub(r"\W+", "_", table_name)
 
         db_name = f"{uuid.uuid4().hex}.db"
-
         database_path = os.path.join("uploads", db_name)
 
         df = pd.read_csv(file.file)
 
         conn = sqlite3.connect(database_path)
 
-        df.to_sql(
-            table_name,
-            conn,
-            index=False,
-            if_exists="replace",
-        )
-
-        conn.close()
+        try:
+            df.to_sql(
+                table_name,
+                conn,
+                index=False,
+                if_exists="replace",
+            )
+        finally:
+            conn.close()
 
         return database_path

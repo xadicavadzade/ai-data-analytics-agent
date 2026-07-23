@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import sqlite3
 
@@ -15,24 +16,30 @@ class ExcelLoader(BaseLoader):
         os.makedirs("uploads", exist_ok=True)
 
         db_name = f"{uuid.uuid4().hex}.db"
-
         database_path = os.path.join("uploads", db_name)
 
         excel = pd.ExcelFile(file.file)
 
         conn = sqlite3.connect(database_path)
 
-        for sheet in excel.sheet_names:
+        try:
+            for sheet in excel.sheet_names:
 
-            df = excel.parse(sheet)
+                df = excel.parse(sheet)
 
-            df.to_sql(
-                sheet,
-                conn,
-                index=False,
-                if_exists="replace",
-            )
+                if df.empty or len(df.columns) == 0:
+                    continue
 
-        conn.close()
+                table_name = re.sub(r"\W+", "_", sheet)
+
+                df.to_sql(
+                    table_name,
+                    conn,
+                    index=False,
+                    if_exists="replace",
+                )
+
+        finally:
+            conn.close()
 
         return database_path
