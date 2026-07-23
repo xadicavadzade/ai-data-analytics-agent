@@ -8,6 +8,9 @@ An intelligent multi-tool AI Data Analytics Agent that transforms natural langua
 
 <img width="1918" height="887" alt="image" src="https://github.com/user-attachments/assets/a0a13071-2a79-44e6-bb85-f55c4f6bdad5" />
 
+<img width="1917" height="891" alt="image" src="https://github.com/user-attachments/assets/16108961-0487-43af-9335-33c6d63aef36" />
+
+
 
 ## Overview
 
