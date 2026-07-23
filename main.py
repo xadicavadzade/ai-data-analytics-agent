@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.analytics import router as analytics_router
 from app.api.health import router as health_router
@@ -17,6 +18,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.mount(
+    "/charts",
+    StaticFiles(directory="charts"),
+    name="charts",
 )
 
 app.include_router(analytics_router)
