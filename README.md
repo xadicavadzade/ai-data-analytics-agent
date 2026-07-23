@@ -6,6 +6,9 @@ An intelligent multi-tool AI Data Analytics Agent that transforms natural langua
 
 ---
 
+<img width="1918" height="887" alt="image" src="https://github.com/user-attachments/assets/a0a13071-2a79-44e6-bb85-f55c4f6bdad5" />
+
+
 ## Overview
 
 This project demonstrates how Large Language Models can orchestrate multiple specialized tools instead of simply generating text.
